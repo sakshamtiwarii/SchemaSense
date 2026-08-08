@@ -4,9 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.demo_sessions import close_all_sessions
 from app.db.postgres import close_db_pool, get_db_pool
 from app.db.redis_client import close_redis
-from app.routes import query, schema
+from app.routes import demo, query, schema
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,6 +16,7 @@ logging.basicConfig(level=logging.INFO)
 async def lifespan(app: FastAPI):
     await get_db_pool()
     yield
+    await close_all_sessions()
     await close_db_pool()
     await close_redis()
 
@@ -30,6 +32,7 @@ app.add_middleware(
 
 app.include_router(query.router)
 app.include_router(schema.router)
+app.include_router(demo.router)
 
 
 @app.get("/health")

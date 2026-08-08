@@ -14,5 +14,11 @@ class Settings(BaseSettings):
     max_correction_attempts: int = 3
     max_result_rows: int = 200
 
+    # Demo mode: visitors can try the service against their own Postgres
+    # database for a single, unpersisted session.
+    demo_session_ttl_seconds: int = 1800
+    max_demo_sessions: int = 20
+    allow_private_demo_hosts: bool = False
+
 
 settings = Settings()

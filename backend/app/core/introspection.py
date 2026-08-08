@@ -23,14 +23,23 @@ async def get_schema_context(pool) -> str:
     return "\n".join(lines)
 
 
-async def get_cached_schema_context(pool, ttl_seconds: int, force_refresh: bool = False) -> str:
+async def get_cached_schema_context(
+    pool,
+    ttl_seconds: int,
+    force_refresh: bool = False,
+    cache_key: str = SCHEMA_CACHE_KEY,
+) -> str:
     r = get_redis()
 
     if not force_refresh:
-        cached = await r.get(SCHEMA_CACHE_KEY)
+        cached = await r.get(cache_key)
         if cached is not None:
             return cached
 
     context = await get_schema_context(pool)
-    await r.set(SCHEMA_CACHE_KEY, context, ex=ttl_seconds)
+    await r.set(cache_key, context, ex=ttl_seconds)
     return context
+
+
+def demo_cache_key(session_id: str) -> str:
+    return f"{SCHEMA_CACHE_KEY}:demo:{session_id}"
