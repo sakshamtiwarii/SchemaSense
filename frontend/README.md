@@ -2,7 +2,8 @@
 
 React (JavaScript) + Vite. A live console for the NL-to-SQL Generator backend:
 ask a question, watch it become SQL, see it actually run — including the
-self-correction loop and demo-mode "bring your own database" flow.
+self-correction loop, demo-mode "bring your own database," and "bring your
+own LLM key" (Groq or OpenAI).
 
 ## Running locally
 
@@ -29,6 +30,7 @@ src/
     ResultTable.jsx        # renders returned rows
     SchemaPanel.jsx         # visualizes GET /schema for whichever DB is active
     DemoConnect.jsx          # POST /demo/connect, DELETE /demo/connect/{id}
+    LLMKeyPanel.jsx           # bring-your-own Groq/OpenAI key, attached per request
     HowItWorks.jsx            # the pipeline, mirrored from the backend's docs
   App.jsx               # orchestrates state; no router or state library needed
                          # at this scope — plain useState/useEffect throughout

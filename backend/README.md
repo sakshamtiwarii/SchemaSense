@@ -84,6 +84,27 @@ Sample questions to try against the seeded data:
 - "How many orders were placed in the last 30 days?"
 - "What's the average order revenue by product category?"
 
+**Bring your own LLM key.** Add an `llm` field to use your own Groq or
+OpenAI key instead of the server's, for that request only:
+
+```json
+{
+  "question": "What were our top 3 products by revenue?",
+  "llm": { "provider": "groq", "api_key": "gsk_...", "model": "llama-3.3-70b-versatile" }
+}
+```
+
+`model` is optional — it defaults to `llama-3.3-70b-versatile` for Groq and
+the server's configured model for OpenAI. Groq's API is OpenAI-compatible,
+so this reuses the same `ChatOpenAI` client pointed at a different base URL
+(`app/core/sql_chain.py`); `provider` is a closed set mapped to a
+server-controlled base URL, not a free-text host, so it can't be used as an
+open proxy the way a demo DB connection string could be. The key is never
+cached, logged, or reused across requests — a fresh client is built per
+call. A bad key surfaces as `400` with a clear message; the server's own
+key failing surfaces as `502`, since that's a different kind of problem
+(ours, not yours).
+
 ### `GET /schema?refresh=false`
 
 Debug endpoint — returns the introspected schema context the LLM is prompted
@@ -159,6 +180,10 @@ pytest
   public IP is allowed, and the `ALLOW_PRIVATE_DEMO_HOSTS` escape hatch works.
 - `tests/test_demo_sessions.py` — confirms session creation/expiry/limits and
   that closing a session actually closes its pool.
+- `tests/test_sql_chain.py` — confirms the default LLM client is a cached
+  singleton, a bring-your-own-key config is never cached or reused, and
+  provider routing (Groq's base URL, per-provider default models, explicit
+  model overrides) resolves correctly.
 
 These run against mocks, not a live DB/LLM, so no Postgres/Redis/OpenAI
 connection is required to run them.
@@ -175,7 +200,7 @@ app/
     demo.py              # POST /demo/connect, DELETE /demo/connect/{id}
   core/
     introspection.py   # reads Postgres schema, caches in Redis
-    sql_chain.py        # prompt assembly + LLM SQL generation
+    sql_chain.py        # prompt assembly + LLM SQL generation + BYOK provider routing
     executor.py          # runs SQL in a READ ONLY transaction, enforces row limit
     correction.py        # the self-correction retry loop
     safety.py            # read-only enforcement (SELECT-only)

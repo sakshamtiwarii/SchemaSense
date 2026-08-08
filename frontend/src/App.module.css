@@ -4,13 +4,32 @@
 
 .workspaceInner {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "schema schema"
+    "demo   llm";
   gap: 1.5rem;
   align-items: stretch;
+}
+
+.schemaArea {
+  grid-area: schema;
+}
+
+.demoArea {
+  grid-area: demo;
+}
+
+.llmArea {
+  grid-area: llm;
 }
 
 @media (max-width: 860px) {
   .workspaceInner {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "schema"
+      "demo"
+      "llm";
   }
 }

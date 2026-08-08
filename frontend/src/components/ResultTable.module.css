@@ -1,6 +1,5 @@
 .card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--rule-strong);
   overflow: hidden;
   background: var(--paper-raised);
 }
@@ -20,8 +19,8 @@
 .table th,
 .table td {
   text-align: left;
-  padding: 0.6rem 0.9rem;
-  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
   white-space: nowrap;
 }
 
@@ -30,8 +29,13 @@
   font-size: 0.72rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--data-strong);
-  background: var(--data-soft);
+  color: var(--ink);
+  background: var(--paper-alt);
+  border-bottom: 2px solid var(--ink);
+}
+
+.table tbody tr:nth-child(even) {
+  background: var(--paper-alt);
 }
 
 .table tbody tr:last-child td {
@@ -39,7 +43,7 @@
 }
 
 .table tbody tr:hover {
-  background: var(--paper-sunken);
+  background: var(--red-soft);
 }
 
 .nullValue {
@@ -48,17 +52,16 @@
 }
 
 .count {
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 0.9rem;
   font-family: var(--font-mono);
   font-size: 0.76rem;
   color: var(--ink-faint);
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--rule-strong);
 }
 
 .empty {
   padding: 1.5rem;
   text-align: center;
   color: var(--ink-soft);
-  border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-md);
+  border: 1px dashed var(--rule-strong);
 }

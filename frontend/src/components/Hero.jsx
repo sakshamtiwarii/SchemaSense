@@ -3,11 +3,13 @@ import styles from "./Hero.module.css";
 export default function Hero({ children }) {
   return (
     <section id="top" className={styles.hero}>
-      <div className={styles.glow} aria-hidden="true" />
       <div className={`${styles.inner} container`}>
-        <p className={styles.eyebrow}>Natural language in — real, executed SQL out</p>
+        <p className={styles.eyebrow}>
+          <span className={styles.eyebrowMark} aria-hidden="true" />
+          Natural language in — real, executed SQL out
+        </p>
         <h1 className={styles.headline}>
-          Ask your database <em>anything.</em>
+          Ask your database <span className={styles.accentWord}>anything.</span>
         </h1>
         <p className={styles.subhead}>
           SchemaSense grounds your question in the real schema, runs the query for real, and fixes its own

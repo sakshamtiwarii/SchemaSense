@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, classifyQueryResult, connectDemo, disconnectDemo, getSchema, runQuery } from "./api/client.js";
 import { useTheme } from "./hooks/useTheme.js";
+import { parseSchema } from "./lib/parseSchema.js";
+import { generateSampleQuestions } from "./lib/sampleQuestions.js";
 import NavBar from "./components/NavBar.jsx";
 import Hero from "./components/Hero.jsx";
 import QueryConsole from "./components/QueryConsole.jsx";
@@ -8,8 +10,11 @@ import ResultPanel from "./components/ResultPanel.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
 import SchemaPanel from "./components/SchemaPanel.jsx";
 import DemoConnect from "./components/DemoConnect.jsx";
+import LLMKeyPanel from "./components/LLMKeyPanel.jsx";
 import Footer from "./components/Footer.jsx";
 import styles from "./App.module.css";
+
+const PROVIDER_LABELS = { groq: "Groq", openai: "OpenAI" };
 
 export default function App() {
   const { theme, toggle: toggleTheme } = useTheme();
@@ -18,6 +23,8 @@ export default function App() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [connectError, setConnectError] = useState(null);
+
+  const [llmOverride, setLlmOverride] = useState(null); // { provider, apiKey, model } | null — never persisted
 
   const [schemaContext, setSchemaContext] = useState("");
   const [schemaLoading, setSchemaLoading] = useState(true);
@@ -86,7 +93,7 @@ export default function App() {
     }, 900);
 
     try {
-      const data = await runQuery(question, demoSession?.sessionId);
+      const data = await runQuery(question, demoSession?.sessionId, llmOverride);
       const classified = classifyQueryResult(data);
       setQueryState({ status: classified.kind, data: classified });
     } catch (err) {
@@ -95,6 +102,8 @@ export default function App() {
           setDemoSession(null);
           loadSchema(null);
         }
+        // A bad BYOK key is left in place on purpose — the user should see
+        // the error and fix it, not have their input silently wiped.
         setQueryState({ status: "error", kind: err.kind, message: err.message });
       } else {
         setQueryState({ status: "error", kind: "unknown", message: "Something went wrong." });
@@ -104,7 +113,13 @@ export default function App() {
     }
   }
 
-  const contextLabel = demoSession ? "Querying your connected database" : "Querying the sample database";
+  const sampleQuestions = useMemo(() => generateSampleQuestions(parseSchema(schemaContext)), [schemaContext]);
+
+  const dbLabel = demoSession ? "your connected database" : "the sample database";
+  const llmLabel = llmOverride
+    ? `your ${PROVIDER_LABELS[llmOverride.provider] ?? llmOverride.provider} key`
+    : "the server's default model";
+  const contextLabel = `Querying ${dbLabel} · via ${llmLabel}`;
   const schemaSourceLabel = demoSession ? "Your connected database" : "Sample database (orders, products)";
 
   return (
@@ -112,7 +127,12 @@ export default function App() {
       <NavBar theme={theme} onToggleTheme={toggleTheme} />
 
       <Hero>
-        <QueryConsole onSubmit={handleQuerySubmit} isLoading={queryState?.status === "loading"} contextLabel={contextLabel} />
+        <QueryConsole
+          onSubmit={handleQuerySubmit}
+          isLoading={queryState?.status === "loading"}
+          contextLabel={contextLabel}
+          sampleQuestions={sampleQuestions}
+        />
         <ResultPanel state={queryState} />
       </Hero>
 
@@ -120,21 +140,28 @@ export default function App() {
 
       <section id="workspace" className={styles.workspace}>
         <div className={`${styles.workspaceInner} container`}>
-          <SchemaPanel
-            schemaContext={schemaContext}
-            isLoading={schemaLoading}
-            error={schemaError}
-            onRefresh={() => loadSchema(demoSession?.sessionId, { refresh: true })}
-            sourceLabel={schemaSourceLabel}
-          />
-          <DemoConnect
-            session={demoSession}
-            onConnect={handleConnect}
-            onDisconnect={handleDisconnect}
-            isConnecting={isConnecting}
-            isDisconnecting={isDisconnecting}
-            error={connectError}
-          />
+          <div className={styles.schemaArea}>
+            <SchemaPanel
+              schemaContext={schemaContext}
+              isLoading={schemaLoading}
+              error={schemaError}
+              onRefresh={() => loadSchema(demoSession?.sessionId, { refresh: true })}
+              sourceLabel={schemaSourceLabel}
+            />
+          </div>
+          <div className={styles.demoArea}>
+            <DemoConnect
+              session={demoSession}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+              isConnecting={isConnecting}
+              isDisconnecting={isDisconnecting}
+              error={connectError}
+            />
+          </div>
+          <div className={styles.llmArea}>
+            <LLMKeyPanel override={llmOverride} onSave={setLlmOverride} onClear={() => setLlmOverride(null)} />
+          </div>
         </div>
       </section>
 

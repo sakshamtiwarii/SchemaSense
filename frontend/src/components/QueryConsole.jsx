@@ -1,13 +1,7 @@
 import { useState } from "react";
 import styles from "./QueryConsole.module.css";
 
-const SAMPLE_QUESTIONS = [
-  "Top 3 products by revenue",
-  "Orders placed in the last 30 days",
-  "Average order revenue by category",
-];
-
-export default function QueryConsole({ onSubmit, isLoading, contextLabel }) {
+export default function QueryConsole({ onSubmit, isLoading, contextLabel, sampleQuestions = [] }) {
   const [question, setQuestion] = useState("");
 
   function handleSubmit(event) {
@@ -24,6 +18,10 @@ export default function QueryConsole({ onSubmit, isLoading, contextLabel }) {
     }
   }
 
+  const placeholder = sampleQuestions[0]
+    ? `Ask it something — “${sampleQuestions[0].toLowerCase()}?”`
+    : "Ask it something about the tables on the right";
+
   return (
     <form className={styles.console} onSubmit={handleSubmit}>
       <div className={styles.contextRow}>
@@ -37,7 +35,7 @@ export default function QueryConsole({ onSubmit, isLoading, contextLabel }) {
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask it something — “what were our top 3 products by revenue?”"
+          placeholder={placeholder}
           rows={2}
           disabled={isLoading}
           aria-label="Ask your database a question"
@@ -47,19 +45,21 @@ export default function QueryConsole({ onSubmit, isLoading, contextLabel }) {
         </button>
       </div>
 
-      <div className={styles.chips}>
-        {SAMPLE_QUESTIONS.map((sample) => (
-          <button
-            type="button"
-            key={sample}
-            className={styles.chip}
-            onClick={() => setQuestion(sample)}
-            disabled={isLoading}
-          >
-            {sample}
-          </button>
-        ))}
-      </div>
+      {sampleQuestions.length > 0 && (
+        <div className={styles.chips}>
+          {sampleQuestions.map((sample) => (
+            <button
+              type="button"
+              key={sample}
+              className={styles.chip}
+              onClick={() => setQuestion(sample)}
+              disabled={isLoading}
+            >
+              {sample}
+            </button>
+          ))}
+        </div>
+      )}
     </form>
   );
 }

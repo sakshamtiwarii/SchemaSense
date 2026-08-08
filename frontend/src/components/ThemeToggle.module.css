@@ -2,20 +2,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--line);
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--rule-strong);
   background: var(--paper-raised);
   color: var(--ink-soft);
-  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
 .toggle:hover {
-  color: var(--accent-strong);
-  border-color: var(--line-strong);
+  color: var(--red);
+  border-color: var(--red);
 }
 
 .toggle:active {
-  transform: scale(0.94);
+  transform: translate(1px, 1px);
 }

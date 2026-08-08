@@ -3,19 +3,20 @@
   align-items: center;
   gap: 0.4rem;
   font-family: var(--font-mono);
-  font-size: 0.76rem;
-  font-weight: 500;
-  padding: 0.3rem 0.7rem;
-  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid currentColor;
   white-space: nowrap;
 }
 
 .clean {
-  color: var(--success);
-  background: var(--success-soft);
+  color: var(--green);
+  background: var(--green-soft);
 }
 
 .corrected {
-  color: var(--accent-strong);
-  background: var(--accent-soft);
+  color: var(--red-strong);
+  background: var(--red-soft);
 }

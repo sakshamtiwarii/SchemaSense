@@ -2,9 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  border-bottom: 3px double var(--ink);
 }
 
 .inner {
@@ -12,35 +11,55 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  height: 3.75rem;
+  height: 3.5rem;
 }
 
 .wordmark {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.55rem;
   font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.15rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--ink);
   text-decoration: none;
+}
+
+.wordmark svg {
+  align-self: center;
+}
+
+.volume {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  border: 1px solid var(--rule-strong);
+  padding: 0.1rem 0.35rem;
 }
 
 .links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  font-size: 0.88rem;
+  gap: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
 }
 
 .links a {
   color: var(--ink-soft);
   text-decoration: none;
+  padding: 0 1rem;
+  border-left: 1px solid var(--rule);
+}
+
+.links a:first-child {
+  border-left: none;
 }
 
 .links a:hover {
-  color: var(--ink);
+  color: var(--red);
 }
 
 @media (max-width: 640px) {

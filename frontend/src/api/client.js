@@ -50,12 +50,15 @@ async function request(path, options = {}) {
 // body, by backend design: it's a different kind of failure from the
 // service being down. Callers branch on the shape of `data`, not on a
 // thrown error, for that case.
-export function runQuery(question, sessionId) {
+export function runQuery(question, sessionId, llmOverride) {
   return request("/query", {
     method: "POST",
     body: JSON.stringify({
       question,
       session_id: sessionId || undefined,
+      llm: llmOverride
+        ? { provider: llmOverride.provider, api_key: llmOverride.apiKey, model: llmOverride.model || undefined }
+        : undefined,
     }),
   });
 }

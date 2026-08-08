@@ -12,12 +12,23 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(to bottom, transparent, transparent 31px, var(--rule) 31px, var(--rule) 32px);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+:root[data-theme="dark"] body {
+  background-image: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body {
+    background-image: none;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -30,7 +41,7 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   text-wrap: balance;
   margin: 0;
   color: var(--ink);
@@ -41,7 +52,7 @@ p {
 }
 
 a {
-  color: var(--accent-strong);
+  color: var(--red-strong);
 }
 
 button,
@@ -60,7 +71,7 @@ a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--data);
+  outline: 2px solid var(--red);
   outline-offset: 2px;
 }
 
@@ -70,8 +81,8 @@ pre {
 }
 
 ::selection {
-  background: var(--accent-soft);
-  color: var(--accent-ink);
+  background: var(--red-soft);
+  color: var(--red-strong);
 }
 
 .container {

@@ -1,55 +1,48 @@
 .hero {
   position: relative;
-  overflow: hidden;
-  padding: 4.5rem 0 3rem;
-}
-
-.glow {
-  position: absolute;
-  top: -12rem;
-  left: 50%;
-  width: 60rem;
-  height: 36rem;
-  transform: translateX(-50%);
-  background: radial-gradient(closest-side, var(--accent-soft), transparent 70%);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-:root[data-theme="dark"] .glow {
-  opacity: 0.35;
+  padding: 4rem 0 3.5rem;
 }
 
 .inner {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   gap: 1.1rem;
+  max-width: 760px;
 }
 
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--data-strong);
+  color: var(--ink-soft);
+}
+
+.eyebrowMark {
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--red);
 }
 
 .headline {
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  font-weight: 400;
-  line-height: 1.08;
-  max-width: 16ch;
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  max-width: 15ch;
 }
 
-.headline em {
-  color: var(--accent-strong);
+.accentWord {
+  color: var(--red);
 }
 
 .subhead {
-  max-width: 46ch;
+  max-width: 52ch;
   color: var(--ink-soft);
   font-size: 1.08rem;
   line-height: 1.6;
@@ -58,7 +51,7 @@
 .consoleSlot {
   width: 100%;
   max-width: 680px;
-  margin-top: 1.4rem;
+  margin-top: 0.9rem;
   display: flex;
   flex-direction: column;
   gap: 1.1rem;

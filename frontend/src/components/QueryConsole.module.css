@@ -1,38 +1,40 @@
 .console {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  padding: 1.1rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--line-strong);
+  gap: 0;
+  border: 2px solid var(--ink);
   background: var(--paper-raised);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-hard);
 }
 
 .contextRow {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--rule-strong);
+  background: var(--paper-alt);
 }
 
 .contextDot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: var(--data);
-  box-shadow: 0 0 0 3px var(--data-soft);
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--green);
+  flex: none;
 }
 
 .contextLabel {
   font-family: var(--font-mono);
-  font-size: 0.76rem;
-  color: var(--ink-faint);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
 }
 
 .inputRow {
   display: flex;
   align-items: flex-end;
   gap: 0.7rem;
+  padding: 1.1rem 1.1rem 0.9rem;
 }
 
 .input {
@@ -41,11 +43,11 @@
   border: none;
   background: transparent;
   font-family: var(--font-display);
-  font-style: italic;
+  font-weight: 500;
   font-size: 1.3rem;
   line-height: 1.4;
   color: var(--ink);
-  padding: 0.2rem 0.1rem;
+  padding: 0;
 }
 
 .input::placeholder {
@@ -58,52 +60,58 @@
 
 .submit {
   flex: none;
-  padding: 0.65rem 1.3rem;
-  border-radius: var(--radius-pill);
-  border: none;
-  background: var(--accent);
+  padding: 0.7rem 1.4rem;
+  border: 2px solid var(--ink);
+  background: var(--ink);
   color: var(--paper);
+  font-family: var(--font-mono);
   font-weight: 600;
-  font-size: 0.92rem;
-  transition: background 0.15s ease, transform 0.15s ease;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-hard-sm);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .submit:hover:not(:disabled) {
-  background: var(--accent-strong);
+  background: var(--red);
+  border-color: var(--red);
 }
 
 .submit:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 .submit:disabled {
-  background: var(--line-strong);
+  background: var(--paper-alt);
+  border-color: var(--rule-strong);
   color: var(--ink-faint);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-top: 0.2rem;
-  border-top: 1px solid var(--line);
+  gap: 0;
+  border-top: 1px solid var(--rule-strong);
 }
 
 .chip {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--line);
-  background: var(--paper-sunken);
+  font-size: 0.76rem;
+  padding: 0.5rem 0.85rem;
+  border: none;
+  border-right: 1px solid var(--rule);
+  background: transparent;
   color: var(--ink-soft);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .chip:hover:not(:disabled) {
-  color: var(--data-strong);
-  border-color: var(--data);
+  background: var(--red-soft);
+  color: var(--red-strong);
 }
 
 .chip:disabled {

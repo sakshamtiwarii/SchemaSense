@@ -1,48 +1,41 @@
+/*
+  Two metaphors, one lineage: structured record-keeping. Light mode is a
+  paper ledger — warm bone paper, near-black ink, a saturated red for
+  anything flagged (the way accountants have marked corrections for 200
+  years). Dark mode is the terminal that replaced it — a clean black
+  screen with a live, confident accent. Same system, different light.
+*/
+
 :root {
-  /* ground */
-  --paper: #f6f4f8;
+  /* ledger paper — warm, neutral, not tinted */
+  --paper: #f7f5f0;
+  --paper-alt: #eeeae1;
   --paper-raised: #ffffff;
-  --paper-sunken: #efebf3;
 
   /* ink */
-  --ink: #1b1626;
-  --ink-soft: #5b5468;
-  --ink-faint: #8b849a;
-  --line: #e1dce8;
-  --line-strong: #cec6da;
+  --ink: #1c1917;
+  --ink-soft: #57534a;
+  --ink-faint: #8c8678;
 
-  /* the human / language side */
-  --accent: #d98d1c;
-  --accent-strong: #b8760f;
-  --accent-soft: #fbedd3;
-  --accent-ink: #6b430c;
+  /* rules (borders/dividers) */
+  --rule: #dcd6c7;
+  --rule-strong: #b5ac96;
 
-  /* the machine / data side */
-  --data: #16767d;
-  --data-strong: #0f5257;
-  --data-soft: #dceef0;
-  --data-ink: #0c3f43;
+  /* the one accent — a real, saturated stamp-red */
+  --red: #c6301d;
+  --red-strong: #9a2515;
+  --red-soft: #fae1db;
 
-  /* semantic */
-  --success: #2e7d52;
-  --success-soft: #e1f1e7;
-  --warning: #a6690b;
-  --warning-soft: #f5eada;
-  --danger: #b23a3a;
-  --danger-soft: #f6e5e5;
+  /* the other ink — positive/confirmed entries */
+  --green: #1e7a4c;
+  --green-soft: #e0f0e3;
 
-  --shadow-sm: 0 1px 2px rgba(27, 22, 38, 0.06);
-  --shadow-md: 0 8px 24px rgba(27, 22, 38, 0.1);
-  --shadow-lg: 0 20px 48px rgba(27, 22, 38, 0.16);
+  --shadow-hard: 3px 3px 0 var(--ink);
+  --shadow-hard-sm: 2px 2px 0 var(--ink);
 
-  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-display: "Bitter", "Iowan Old Style", Georgia, serif;
   --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
 
   --container: 1120px;
   --measure: 62ch;
@@ -50,68 +43,48 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #131019;
-    --paper-raised: #1c1826;
-    --paper-sunken: #100d16;
+    --paper: #0b0b0a;
+    --paper-alt: #171613;
+    --paper-raised: #121110;
 
-    --ink: #ede9f3;
-    --ink-soft: #b3abc4;
-    --ink-faint: #766e88;
-    --line: #322b42;
-    --line-strong: #453b5b;
+    --ink: #ede9df;
+    --ink-soft: #a6a08f;
+    --ink-faint: #6b6659;
 
-    --accent: #eba33c;
-    --accent-strong: #f2b563;
-    --accent-soft: #3c2a10;
-    --accent-ink: #f6d59a;
+    --rule: #2b2924;
+    --rule-strong: #423e34;
 
-    --data: #4fc3cc;
-    --data-strong: #7ad4db;
-    --data-soft: #103439;
-    --data-ink: #a6e4e8;
+    --red: #ff6b4a;
+    --red-strong: #ff9478;
+    --red-soft: #2a1510;
 
-    --success: #74c99a;
-    --success-soft: #142f21;
-    --warning: #e7b054;
-    --warning-soft: #352708;
-    --danger: #e68c86;
-    --danger-soft: #34191a;
+    --green: #3ddc84;
+    --green-soft: #0f2a1b;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+    --shadow-hard: 3px 3px 0 var(--green);
+    --shadow-hard-sm: 2px 2px 0 var(--green);
   }
 }
 
 :root[data-theme="dark"] {
-  --paper: #131019;
-  --paper-raised: #1c1826;
-  --paper-sunken: #100d16;
+  --paper: #0b0b0a;
+  --paper-alt: #171613;
+  --paper-raised: #121110;
 
-  --ink: #ede9f3;
-  --ink-soft: #b3abc4;
-  --ink-faint: #766e88;
-  --line: #322b42;
-  --line-strong: #453b5b;
+  --ink: #ede9df;
+  --ink-soft: #a6a08f;
+  --ink-faint: #6b6659;
 
-  --accent: #eba33c;
-  --accent-strong: #f2b563;
-  --accent-soft: #3c2a10;
-  --accent-ink: #f6d59a;
+  --rule: #2b2924;
+  --rule-strong: #423e34;
 
-  --data: #4fc3cc;
-  --data-strong: #7ad4db;
-  --data-soft: #103439;
-  --data-ink: #a6e4e8;
+  --red: #ff6b4a;
+  --red-strong: #ff9478;
+  --red-soft: #2a1510;
 
-  --success: #74c99a;
-  --success-soft: #142f21;
-  --warning: #e7b054;
-  --warning-soft: #352708;
-  --danger: #e68c86;
-  --danger-soft: #34191a;
+  --green: #3ddc84;
+  --green-soft: #0f2a1b;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-hard: 3px 3px 0 var(--green);
+  --shadow-hard-sm: 2px 2px 0 var(--green);
 }
