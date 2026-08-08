@@ -1,0 +1,38 @@
+# ===== Backend (Python / FastAPI) =====
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+backend/.venv/
+backend/venv/
+backend/.env
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+*.egg-info/
+.Python
+build/
+dist/
+
+# ===== Frontend (Node / React / Next.js / Vite) =====
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/.turbo/
+frontend/.vite/
+frontend/coverage/
+frontend/*.tsbuildinfo
+
+# ===== Editors / OS =====
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# ===== Docker =====
+docker-compose.override.yml
