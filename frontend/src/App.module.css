@@ -1,0 +1,16 @@
+.workspace {
+  padding: 1rem 0 4rem;
+}
+
+.workspaceInner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 860px) {
+  .workspaceInner {
+    grid-template-columns: 1fr;
+  }
+}

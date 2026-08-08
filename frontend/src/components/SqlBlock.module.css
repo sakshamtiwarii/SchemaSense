@@ -1,0 +1,55 @@
+.block {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--paper-sunken);
+  overflow: hidden;
+}
+
+.block.danger {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+  background: var(--danger-soft);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.danger .head {
+  border-bottom-color: color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.danger .label {
+  color: var(--danger);
+}
+
+.pre {
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+  overflow-x: auto;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.keyword {
+  color: var(--data-strong);
+  font-weight: 600;
+}
+
+.danger .keyword {
+  color: var(--danger);
+}

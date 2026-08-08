@@ -1,6 +1,14 @@
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+
+
+class LLMOverride(BaseModel):
+    provider: Literal["openai", "groq"] = "groq"
+    api_key: str = Field(
+        ..., min_length=1, description="Your own API key for the chosen provider. Used only for this request."
+    )
+    model: str | None = Field(None, description="Optional model override; defaults to a sensible model per provider.")
 
 
 class QueryRequest(BaseModel):
@@ -8,6 +16,10 @@ class QueryRequest(BaseModel):
     session_id: str | None = Field(
         None,
         description="Demo session id from POST /demo/connect. Omit to query the default database.",
+    )
+    llm: LLMOverride | None = Field(
+        None,
+        description="Bring your own LLM API key (e.g. Groq) instead of the server's default. Never stored.",
     )
 
 

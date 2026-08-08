@@ -1,0 +1,66 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 4.5rem 0 3rem;
+}
+
+.glow {
+  position: absolute;
+  top: -12rem;
+  left: 50%;
+  width: 60rem;
+  height: 36rem;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, var(--accent-soft), transparent 70%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] .glow {
+  opacity: 0.35;
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.1rem;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--data-strong);
+}
+
+.headline {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 400;
+  line-height: 1.08;
+  max-width: 16ch;
+}
+
+.headline em {
+  color: var(--accent-strong);
+}
+
+.subhead {
+  max-width: 46ch;
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.consoleSlot {
+  width: 100%;
+  max-width: 680px;
+  margin-top: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  text-align: left;
+}
