@@ -1,11 +1,12 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 
 from app.config import settings
 from app.core.demo_sessions import DemoSessionLimitError, close_session, create_session
 from app.core.introspection import demo_cache_key
 from app.core.network_guard import UnsafeHostError, assert_host_is_safe
+from app.core.rate_limit import enforce_rate_limit
 from app.db.redis_client import get_redis
 from app.schemas.schemas import DemoConnectRequest, DemoConnectResponse
 
@@ -15,7 +16,14 @@ router = APIRouter(prefix="/demo")
 
 
 @router.post("/connect", response_model=DemoConnectResponse)
-async def connect(request: DemoConnectRequest) -> DemoConnectResponse:
+async def connect(request: DemoConnectRequest, http_request: Request) -> DemoConnectResponse:
+    await enforce_rate_limit(
+        http_request,
+        key="demo_connect",
+        limit=settings.rate_limit_demo_connect_per_minute,
+        window_seconds=60,
+    )
+
     try:
         await assert_host_is_safe(request.connection_string)
     except UnsafeHostError as exc:
@@ -41,7 +49,13 @@ async def connect(request: DemoConnectRequest) -> DemoConnectResponse:
 
 
 @router.delete("/connect/{session_id}", status_code=204)
-async def disconnect(session_id: str) -> Response:
+async def disconnect(session_id: str, http_request: Request) -> Response:
+    await enforce_rate_limit(
+        http_request,
+        key="demo_disconnect",
+        limit=settings.rate_limit_demo_connect_per_minute,
+        window_seconds=60,
+    )
     await close_session(session_id)
     await get_redis().delete(demo_cache_key(session_id))
     return Response(status_code=204)

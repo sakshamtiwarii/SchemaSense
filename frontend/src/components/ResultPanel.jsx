@@ -77,8 +77,8 @@ const ERROR_COPY = {
     body: "Make sure the backend is running and VITE_API_BASE_URL points at it.",
   },
   rate_limited: {
-    title: "Too many demo sessions right now",
-    body: "The demo-session limit is in place to keep things fair — try again shortly.",
+    title: "Slow down a little",
+    body: "There's a request limit in place to keep things fair for everyone — try again in a moment.",
   },
   bad_request: {
     title: "That didn't go through",

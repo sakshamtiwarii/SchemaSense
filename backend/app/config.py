@@ -20,5 +20,18 @@ class Settings(BaseSettings):
     max_demo_sessions: int = 20
     allow_private_demo_hosts: bool = False
 
+    # Comma-separated list of origins allowed to call this API from a
+    # browser. Defaults to the local Vite dev server; a real deployment
+    # should set this to the actual frontend origin(s), not "*".
+    cors_allowed_origins: str = "http://localhost:5173"
+
+    # Per-client-IP request caps, backed by Redis so they hold correctly
+    # across multiple backend replicas. /query is the expensive one (it
+    # burns LLM API calls, up to 3x per request via the correction loop),
+    # so it gets the tightest limit.
+    rate_limit_query_per_minute: int = 10
+    rate_limit_demo_connect_per_minute: int = 5
+    rate_limit_schema_per_minute: int = 30
+
 
 settings = Settings()

@@ -1,10 +1,11 @@
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 from app.config import settings
 from app.core.correction import answer_question
 from app.core.introspection import get_cached_schema_context
+from app.core.rate_limit import enforce_rate_limit
 from app.core.session_routing import resolve_pool_and_cache_key
 from app.core.sql_chain import LLMConfig
 from app.schemas.schemas import QueryRequest
@@ -15,7 +16,14 @@ router = APIRouter()
 
 
 @router.post("/query")
-async def query(request: QueryRequest) -> dict:
+async def query(request: QueryRequest, http_request: Request) -> dict:
+    await enforce_rate_limit(
+        http_request,
+        key="query",
+        limit=settings.rate_limit_query_per_minute,
+        window_seconds=60,
+    )
+
     llm_config = (
         LLMConfig(provider=request.llm.provider, api_key=request.llm.api_key, model=request.llm.model)
         if request.llm

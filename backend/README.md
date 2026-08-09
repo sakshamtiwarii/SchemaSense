@@ -160,6 +160,32 @@ wipes its cached schema; otherwise it expires on its own after
   of good practice, but don't rely on it being true — the transaction wrapper
   is the actual guarantee.
 
+## Production hardening
+
+Two things a public deployment needs that local dev doesn't:
+
+- **CORS**: `CORS_ALLOWED_ORIGINS` (comma-separated) — defaults to the local
+  Vite dev server. Set it to the real frontend origin(s) before deploying;
+  `main.py` no longer allows `"*"`, and only `GET`/`POST`/`DELETE` +
+  `Content-Type` are permitted, matching what the API actually uses.
+- **Rate limiting** (`app/core/rate_limit.py`): a Redis-backed fixed-window
+  limiter, keyed by client IP (`X-Forwarded-For` if present, else the
+  connection's own address) plus a per-route label, so `/query`,
+  `/demo/connect`, and `/schema` are limited independently. `/query` gets
+  the tightest cap (`RATE_LIMIT_QUERY_PER_MINUTE`, default 10/min) since
+  it's the expensive one — up to 3 LLM calls per request via the
+  correction loop. Redis-backed rather than an in-memory counter on
+  purpose: correct across multiple backend replicas, the same class of bug
+  already documented on `demo_sessions.py` below, avoided here instead of
+  repeated. Fails open on a Redis error — a rate-limit check failing
+  shouldn't itself take the API down; anything actually dependent on
+  Redis will surface its own honest error.
+
+Neither of these was needed for local development, both are close to the
+top of what's needed before this is exposed to the public internet. See
+`docker/init.sql`'s hardcoded `nlsql_app` password and the in-memory demo
+session store (below) for what's still open beyond this.
+
 ## Tests
 
 ```bash
@@ -184,6 +210,11 @@ pytest
   singleton, a bring-your-own-key config is never cached or reused, and
   provider routing (Groq's base URL, per-provider default models, explicit
   model overrides) resolves correctly.
+- `tests/test_rate_limit.py` — confirms requests under the limit pass,
+  requests over it get a `429` with `Retry-After`, different IPs/routes
+  are limited independently, `X-Forwarded-For` is preferred over the raw
+  connection address, the window actually resets after its boundary, and
+  a Redis failure fails open instead of blocking requests.
 
 These run against mocks, not a live DB/LLM, so no Postgres/Redis/OpenAI
 connection is required to run them.
@@ -207,6 +238,7 @@ app/
     prompts.py           # system prompts
     demo_sessions.py     # in-memory registry of demo DB connections
     network_guard.py     # SSRF guard for demo connection hosts
+    rate_limit.py         # Redis-backed per-IP request caps
   db/
     postgres.py          # asyncpg pool (lazy singleton)
     redis_client.py      # redis client (lazy singleton)
