@@ -69,8 +69,8 @@ const ERROR_COPY = {
     body: "Demo connections close automatically after a while of inactivity. Reconnect your database to keep going.",
   },
   infra: {
-    title: "The service hit a snag",
-    body: "Something upstream — the model or the database connection — failed to respond. Worth a retry.",
+    title: "Please Check the API Keys",
+    body: "Either the OpenAI API key or the database connection is misconfigured. Check the keys or database string below and try again.",
   },
   network: {
     title: "Can't reach the API",
