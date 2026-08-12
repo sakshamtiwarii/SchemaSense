@@ -38,9 +38,14 @@ _llm: ChatOpenAI | None = None
 
 def get_llm(config: LLMConfig | None = None) -> ChatOpenAI:
     if config is None:
+        # The server's own default — settings.default_llm_provider decides
+        # which OpenAI-compatible endpoint settings.openai_api_key is for.
+        # Defaults to "openai" so an unconfigured deployment behaves exactly
+        # as before; set DEFAULT_LLM_PROVIDER=groq to make a Groq key the
+        # default instead, same routing BYOK uses.
         global _llm
         if _llm is None:
-            _llm = ChatOpenAI(model=settings.chat_model, temperature=0, api_key=settings.openai_api_key)
+            _llm = _build_client(settings.default_llm_provider, settings.openai_api_key, settings.chat_model)
         return _llm
 
     # Bring-your-own-key: a fresh client built per call. Never cached and
@@ -48,8 +53,12 @@ def get_llm(config: LLMConfig | None = None) -> ChatOpenAI:
     # only for the lifetime of this call, same as a demo DB connection
     # exists only for its session.
     model = config.model or PROVIDER_DEFAULT_MODELS.get(config.provider) or settings.chat_model
-    kwargs = {"model": model, "temperature": 0, "api_key": config.api_key}
-    base_url = PROVIDER_BASE_URLS.get(config.provider)
+    return _build_client(config.provider, config.api_key, model)
+
+
+def _build_client(provider: str, api_key: str, model: str) -> ChatOpenAI:
+    kwargs = {"model": model, "temperature": 0, "api_key": api_key}
+    base_url = PROVIDER_BASE_URLS.get(provider)
     if base_url:
         kwargs["base_url"] = base_url
     return ChatOpenAI(**kwargs)

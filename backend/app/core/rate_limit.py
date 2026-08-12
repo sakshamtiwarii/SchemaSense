@@ -39,11 +39,11 @@ async def enforce_rate_limit(request: Request, *, key: str, limit: int, window_s
 
 
 def _client_ip(request: Request) -> str:
-    # Trusts X-Forwarded-For as set by the platform's edge proxy (Render/
-    # Railway/Fly/etc. all set this correctly on the way in). This app isn't
-    # meant to sit directly on the public internet without one of those in
-    # front of it — if it ever does, this header becomes spoofable and this
-    # function should be revisited.
+    # Trusts X-Forwarded-For as set by the platform's edge proxy — Railway
+    # (and most other PaaS hosts) sets this correctly on the way in. This
+    # app isn't meant to sit directly on the public internet without one of
+    # those in front of it — if it ever does, this header becomes
+    # spoofable and this function should be revisited.
     forwarded = request.headers.get("x-forwarded-for")
     if forwarded:
         return forwarded.split(",")[0].strip()

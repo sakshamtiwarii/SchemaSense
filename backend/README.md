@@ -103,6 +103,11 @@ open proxy the way a demo DB connection string could be. The key is never
 cached, logged, or reused across requests — a fresh client is built per
 call. A bad key surfaces as `400` with a clear message; the server's own
 key failing surfaces as `502`, since that's a different kind of problem
+
+The server's *own* default (used when a request brings no `llm` field) is
+provider-aware too, via the same routing — set `DEFAULT_LLM_PROVIDER=groq`
+and put a Groq key in `OPENAI_API_KEY` to make Groq the default without
+requiring every visitor to bring their own key.
 (ours, not yours).
 
 ### `GET /schema?refresh=false`

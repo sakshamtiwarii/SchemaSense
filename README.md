@@ -25,7 +25,7 @@ An LLM with no context has no idea what tables or columns your database has. Ask
 
 ## Try it
 
-- **Frontend (live):** https://frontend-pearl-nine-hu5nqtwm3d.vercel.app — the UI is fully live; it isn't wired to a public backend yet, so live queries need the backend running locally (below).
+- **Live:** https://schemasense-saksham-tiwarii.vercel.app — frontend on Vercel, backend on Railway (Postgres + Redis + the API, all three), fully wired end to end. Ask it something directly, no key required — or bring your own Groq/OpenAI key via the workspace panel to use your own account instead.
 - **Locally, in under a minute:**
 
   ```bash
@@ -57,7 +57,7 @@ backend/    FastAPI service — see backend/README.md for the full API, safety
             model, demo mode, BYOK, rate limiting, and test suite
 frontend/   React + Vite console — see frontend/README.md for the design
             system and component structure
-render.yaml            Backend deployment blueprint (Render)
+backend/railway.json        Backend deployment config (Railway)
 NL_to_SQL_Build_Guide.pdf   The original spec this was built from
 ```
 
@@ -81,12 +81,17 @@ dependencies or API cost.
 ## Deployment
 
 The frontend deploys to Vercel in one command (`vercel --prod` from
-`frontend/`). The backend is packaged as a `render.yaml` blueprint —
-Postgres + Redis + the API as a Docker service — for Render; provisioning
-a fresh Postgres still needs a one-time manual step to seed it
+`frontend/`). The backend deploys to Railway as a Docker service
+(`backend/railway.json` configures the build and health check), with a
+Postgres and Redis instance added to the same Railway project — Railway
+auto-wires their connection strings into the service's environment via
+its `${{ServiceName.VARIABLE}}` reference syntax. Railway's managed
+Postgres is a bare instance, same as any managed Postgres: provisioning a
+fresh one still needs a one-time manual step to seed it
 (`backend/docker/init.sql` creates the sample data and the read-only
-`nlsql_app` role, which Render's managed Postgres doesn't auto-run the
-way local `docker compose` does).
+`nlsql_app` role — it isn't auto-run the way local `docker compose` does
+via the official Postgres image's init-script hook). The `Dockerfile`
+binds to `$PORT` if Railway sets it, falling back to `8000` for local use.
 
 ## Origin
 

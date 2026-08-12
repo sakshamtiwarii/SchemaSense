@@ -7,8 +7,13 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://nlsql_app:nlsql_app@localhost:5432/nlsql"
     redis_url: str = "redis://localhost:6379/0"
 
+    # The server's own default LLM (used whenever a request doesn't bring
+    # its own key). openai_api_key holds whatever key that provider needs —
+    # it's still named for the common case, but with default_llm_provider
+    # set to "groq" it holds a Groq key instead, same routing BYOK uses.
     openai_api_key: str = ""
     chat_model: str = "gpt-4o-mini"
+    default_llm_provider: str = "openai"
 
     schema_cache_ttl_seconds: int = 3600
     max_correction_attempts: int = 3

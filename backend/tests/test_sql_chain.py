@@ -26,6 +26,18 @@ def test_default_llm_is_a_cached_singleton():
     assert "base_url" not in first.kwargs
 
 
+def test_default_llm_respects_a_configured_non_openai_provider(monkeypatch):
+    monkeypatch.setattr(sql_chain.settings, "default_llm_provider", "groq")
+    monkeypatch.setattr(sql_chain.settings, "openai_api_key", "gsk_default")
+    monkeypatch.setattr(sql_chain.settings, "chat_model", "llama-3.3-70b-versatile")
+
+    llm = sql_chain.get_llm()
+
+    assert llm.kwargs["api_key"] == "gsk_default"
+    assert llm.kwargs["base_url"] == sql_chain.PROVIDER_BASE_URLS["groq"]
+    assert llm.kwargs["model"] == "llama-3.3-70b-versatile"
+
+
 def test_byok_groq_uses_groqs_base_url_and_default_model():
     config = LLMConfig(provider="groq", api_key="gsk_test")
 

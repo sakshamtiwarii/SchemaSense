@@ -10,4 +10,7 @@ COPY docker ./docker
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form (not exec-array form) so $PORT actually expands — Railway
+# assigns a dynamic port at runtime via this env var; local docker-compose
+# doesn't set it, so it falls back to 8000 same as before.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
