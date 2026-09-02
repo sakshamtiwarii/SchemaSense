@@ -95,7 +95,9 @@ OpenAI key instead of the server's, for that request only:
 ```
 
 `model` is optional — it defaults to `openai/gpt-oss-120b` for Groq and
-the server's configured model for OpenAI. Groq's API is OpenAI-compatible,
+`gpt-4o-mini` for OpenAI. Each provider names its own default rather than
+inheriting `CHAT_MODEL`, which belongs to whichever provider the server's
+own key is for. Groq's API is OpenAI-compatible,
 so this reuses the same `ChatOpenAI` client pointed at a different base URL
 (`app/core/sql_chain.py`); `provider` is a closed set mapped to a
 server-controlled base URL, not a free-text host, so it can't be used as an

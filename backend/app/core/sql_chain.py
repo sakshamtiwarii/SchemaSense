@@ -62,8 +62,14 @@ PROVIDER_BASE_URLS = {
     "groq": "https://api.groq.com/openai/v1",
 }
 
+# Every provider names its own default. Deliberately *not* falling back to
+# settings.chat_model here: that is the model for whichever provider the
+# server's own key belongs to, so inheriting it sends one provider's model
+# name to another's endpoint the moment the two differ — a 404 that reads
+# exactly like a rejected key. These values are what the UI advertises in
+# LLMKeyPanel.jsx; keep the two in step.
 PROVIDER_DEFAULT_MODELS = {
-    "openai": None,  # None = fall back to settings.chat_model
+    "openai": "gpt-4o-mini",
     # Groq retires models on a rolling basis and a retired name comes back
     # as a 404 that reads exactly like a bad key — llama-3.3-70b-versatile
     # sat here until its shutdown on 2026-08-16. Check
@@ -90,7 +96,10 @@ def get_llm(config: LLMConfig | None = None) -> ChatOpenAI:
     # never assigned to the module-level singleton above — the key exists
     # only for the lifetime of this call, same as a demo DB connection
     # exists only for its session.
-    model = config.model or PROVIDER_DEFAULT_MODELS.get(config.provider) or settings.chat_model
+    # No settings.chat_model tail: provider is a closed set (validated by the
+    # request schema), so a default always exists, and borrowing the server's
+    # model here is exactly the cross-provider mismatch described above.
+    model = config.model or PROVIDER_DEFAULT_MODELS[config.provider]
     return _build_client(config.provider, config.api_key, model)
 
 

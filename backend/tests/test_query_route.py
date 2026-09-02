@@ -136,3 +136,15 @@ def test_a_provider_rejection_falls_back_to_the_generic_wording(monkeypatch):
     assert response.status_code == 400
     assert "API key/model" in response.json()["detail"]
     assert "sk-ab" not in response.json()["detail"]
+
+
+def test_a_locally_rejected_key_logs_a_usable_reason(monkeypatch, caplog):
+    """A key stopped by our own pre-flight check has no __cause__, which used
+    to log the literal string "NoneType" — the one line meant to say why."""
+    _answers_with(monkeypatch, LLMConfigError("non-ASCII", client_detail="bad character"))
+
+    with caplog.at_level("WARNING"):
+        client.post("/query", json={"question": "count products", "llm": BYOK})
+
+    assert "NoneType" not in caplog.text
+    assert "rejected before sending" in caplog.text

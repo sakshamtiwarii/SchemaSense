@@ -1,9 +1,12 @@
+from typing import get_args
+
 import httpx
 import openai
 import pytest
 
 from app.core import sql_chain
-from app.core.sql_chain import LLMConfig
+from app.core.sql_chain import PROVIDER_BASE_URLS, PROVIDER_DEFAULT_MODELS, LLMConfig
+from app.schemas.schemas import LLMOverride
 
 
 class _FakeChatOpenAI:
@@ -64,7 +67,29 @@ def test_byok_openai_has_no_custom_base_url():
     llm = sql_chain.get_llm(config)
 
     assert "base_url" not in llm.kwargs
-    assert llm.kwargs["model"] == sql_chain.settings.chat_model
+    assert llm.kwargs["model"] == PROVIDER_DEFAULT_MODELS["openai"]
+
+
+def test_byok_does_not_borrow_the_servers_model_across_providers(monkeypatch):
+    """The server's CHAT_MODEL belongs to whichever provider its own key is
+    for. A visitor bringing an OpenAI key while the server runs on Groq used
+    to get a Groq model name sent to OpenAI, and a 404 that reads exactly
+    like a rejected key."""
+    monkeypatch.setattr(sql_chain.settings, "chat_model", "openai/gpt-oss-120b")
+
+    llm = sql_chain.get_llm(LLMConfig(provider="openai", api_key="sk-test"))
+
+    assert llm.kwargs["model"] == "gpt-4o-mini"
+
+
+def test_every_provider_the_schema_accepts_has_a_default_model():
+    """get_llm indexes PROVIDER_DEFAULT_MODELS directly, so a provider added
+    to the request schema without one raises KeyError at request time — on a
+    real request, not in CI. This pins the two together."""
+    accepted = set(get_args(LLMOverride.model_fields["provider"].annotation))
+
+    assert accepted == set(PROVIDER_DEFAULT_MODELS) == set(PROVIDER_BASE_URLS)
+    assert all(PROVIDER_DEFAULT_MODELS.values())
 
 
 def test_byok_client_is_never_cached_or_reused():

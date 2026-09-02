@@ -54,10 +54,12 @@ async def query(request: QueryRequest, http_request: Request) -> dict:
             # A provider can quote a partially masked form of the caller's own
             # key back in its error text, so log the shape of the failure and
             # never the message itself.
+            # __cause__ is the provider's own exception when one was raised;
+            # a key rejected by our own pre-flight check has none, and
+            # "NoneType" in the log is worse than useless.
+            reason = type(exc.__cause__).__name__ if exc.__cause__ else "rejected before sending"
             logger.warning(
-                "Bring-your-own-key request rejected by %s: %s",
-                llm_config.provider,
-                type(exc.__cause__).__name__,
+                "Bring-your-own-key request rejected by %s: %s", llm_config.provider, reason
             )
             raise HTTPException(
                 status_code=400,
