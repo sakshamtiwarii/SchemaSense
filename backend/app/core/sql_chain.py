@@ -15,7 +15,16 @@ class LLMConfigError(Exception):
     that no longer exists. Rate limits, timeouts and provider outages say
     nothing about how the request was configured, so they deliberately stay
     ordinary exceptions and reach the route as an upstream failure.
+
+    `client_detail` is the subset of the reason that is safe to show the
+    caller. It stays None for anything the provider wrote, because those
+    messages quote a partially masked form of the submitted key back — only
+    text this module composed itself is ever echoed out.
     """
+
+    def __init__(self, message: str, *, client_detail: str | None = None) -> None:
+        super().__init__(message)
+        self.client_detail = client_detail
 
 
 # The provider errors that mean "what you configured is wrong", as opposed
@@ -93,6 +102,28 @@ def _build_client(provider: str, api_key: str, model: str) -> ChatOpenAI:
     return ChatOpenAI(**kwargs)
 
 
+def _assert_key_is_transmittable(api_key: str) -> None:
+    """Reject a key that can't survive being put in an HTTP header.
+
+    The key goes out as `Authorization: Bearer <key>`, and httpx encodes
+    header values as ASCII. A key pasted with surrounding prose, or one
+    that has been through an editor that turns "--" into an em dash, blows
+    up inside the provider SDK with a UnicodeEncodeError — far from
+    anything that names the key as the culprit. Checking here turns that
+    into the same honest "your key is unusable" answer as a rejected one.
+    """
+    if api_key.isascii():
+        return
+
+    bad = next(ch for ch in api_key if not ch.isascii())
+    reason = (
+        f"The API key contains a non-ASCII character ({bad!r}, U+{ord(bad):04X}) and can't be "
+        "sent in a request header. Copy the key on its own, with no surrounding text."
+    )
+    # Names the offending character but never the key, so it is safe to show.
+    raise LLMConfigError(reason, client_detail=reason)
+
+
 async def _draft_sql(prompt: str, llm_config: LLMConfig | None) -> str:
     """Run one prompt through the LLM, translating configuration failures.
 
@@ -100,6 +131,9 @@ async def _draft_sql(prompt: str, llm_config: LLMConfig | None) -> str:
     bad key or model, and both are funnelled into LLMConfigError so callers
     never have to know which provider SDK is underneath.
     """
+    if llm_config is not None:
+        _assert_key_is_transmittable(llm_config.api_key)
+
     try:
         # Construction fails only when the key is missing or blank — the
         # provider SDK checks that before any network call happens.
@@ -111,6 +145,11 @@ async def _draft_sql(prompt: str, llm_config: LLMConfig | None) -> str:
         response = await llm.ainvoke(prompt)
     except CONFIG_ERRORS as exc:
         raise LLMConfigError(str(exc)) from exc
+    except UnicodeEncodeError as exc:
+        # Belt and braces behind _assert_key_is_transmittable: any other
+        # unencodable header value would otherwise surface as a generic
+        # upstream failure, which points debugging in the wrong direction.
+        raise LLMConfigError(f"Request headers could not be encoded: {exc.reason}") from exc
 
     return _extract_sql(response.content)
 

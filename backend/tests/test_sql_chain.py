@@ -143,3 +143,60 @@ async def test_the_correction_prompt_translates_errors_the_same_way(monkeypatch)
 
     with pytest.raises(sql_chain.LLMConfigError):
         await sql_chain.fix_sql("q", "SELECT 1", "boom", "schema", LLMConfig(provider="groq", api_key="gsk_test"))
+
+
+@pytest.mark.parametrize("bad_key", ["gsk_abc—def", "gsk_“quoted”", "gsk_café"])
+async def test_a_key_that_cannot_go_in_a_header_is_caught_before_the_request(monkeypatch, bad_key):
+    """An em dash or smart quote in a pasted key blows up deep inside httpx
+    with a UnicodeEncodeError, which reads like an outage rather than a bad
+    key. It has to be named for what it is."""
+    called = False
+
+    def _should_not_run(config=None):
+        nonlocal called
+        called = True
+        raise AssertionError("the client must not be built with an unsendable key")
+
+    monkeypatch.setattr(sql_chain, "get_llm", _should_not_run)
+
+    with pytest.raises(sql_chain.LLMConfigError) as caught:
+        await sql_chain.generate_sql("q", "schema", LLMConfig(provider="groq", api_key=bad_key))
+
+    assert not called
+    assert "non-ASCII" in caught.value.client_detail
+
+
+async def test_the_unsendable_key_error_never_quotes_the_key(monkeypatch):
+    key = "gsk_supersecrettoken—trailing"
+    monkeypatch.setattr(sql_chain, "get_llm", lambda config=None: None)
+
+    with pytest.raises(sql_chain.LLMConfigError) as caught:
+        await sql_chain.generate_sql("q", "schema", LLMConfig(provider="groq", api_key=key))
+
+    assert "supersecrettoken" not in str(caught.value)
+    assert "supersecrettoken" not in caught.value.client_detail
+
+
+async def test_a_provider_error_is_never_echoed_to_the_caller(monkeypatch):
+    """Provider text can quote a masked form of the key, so it stays server-side."""
+    exc = _provider_error(openai.AuthenticationError, 401)
+    monkeypatch.setattr(sql_chain, "get_llm", lambda config=None: _RaisingClient(exc))
+
+    with pytest.raises(sql_chain.LLMConfigError) as caught:
+        await sql_chain.generate_sql("q", "schema", LLMConfig(provider="groq", api_key="gsk_test"))
+
+    assert caught.value.client_detail is None
+
+
+async def test_an_ascii_key_still_reaches_the_client(monkeypatch):
+    seen = {}
+
+    class _Ok:
+        async def ainvoke(self, prompt):
+            seen["called"] = True
+            return type("R", (), {"content": "SELECT 1"})()
+
+    monkeypatch.setattr(sql_chain, "get_llm", lambda config=None: _Ok())
+
+    assert await sql_chain.generate_sql("q", "schema", LLMConfig(provider="groq", api_key="gsk_fine")) == "SELECT 1"
+    assert seen["called"]

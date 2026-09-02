@@ -61,7 +61,8 @@ async def query(request: QueryRequest, http_request: Request) -> dict:
             )
             raise HTTPException(
                 status_code=400,
-                detail="Couldn't use the provided LLM API key/model — check that it's valid and try again.",
+                detail=exc.client_detail
+                or "Couldn't use the provided LLM API key/model — check that it's valid and try again.",
             ) from exc
         # The server's own credentials are the broken ones. That is a 5xx:
         # the caller did nothing wrong and can't fix it by retrying with a

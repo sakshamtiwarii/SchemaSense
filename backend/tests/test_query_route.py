@@ -112,3 +112,27 @@ def test_a_working_request_passes_the_body_straight_through(monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["attempts"] == 1
+
+
+def test_an_unsendable_key_tells_the_caller_what_is_actually_wrong(monkeypatch):
+    """The generic wording sent people off to regenerate a key that was fine —
+    when the real problem is a character they pasted along with it."""
+    _answers_with(
+        monkeypatch,
+        LLMConfigError("non-ASCII", client_detail="The API key contains a non-ASCII character ('—', U+2014)."),
+    )
+
+    response = client.post("/query", json={"question": "count products", "llm": BYOK})
+
+    assert response.status_code == 400
+    assert "non-ASCII" in response.json()["detail"]
+
+
+def test_a_provider_rejection_falls_back_to_the_generic_wording(monkeypatch):
+    _answers_with(monkeypatch, LLMConfigError("401 from groq, key sk-ab***xyz"))
+
+    response = client.post("/query", json={"question": "count products", "llm": BYOK})
+
+    assert response.status_code == 400
+    assert "API key/model" in response.json()["detail"]
+    assert "sk-ab" not in response.json()["detail"]
