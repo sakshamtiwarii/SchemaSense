@@ -31,13 +31,13 @@ def test_default_llm_is_a_cached_singleton():
 def test_default_llm_respects_a_configured_non_openai_provider(monkeypatch):
     monkeypatch.setattr(sql_chain.settings, "default_llm_provider", "groq")
     monkeypatch.setattr(sql_chain.settings, "openai_api_key", "gsk_default")
-    monkeypatch.setattr(sql_chain.settings, "chat_model", "llama-3.3-70b-versatile")
+    monkeypatch.setattr(sql_chain.settings, "chat_model", "openai/gpt-oss-120b")
 
     llm = sql_chain.get_llm()
 
     assert llm.kwargs["api_key"] == "gsk_default"
     assert llm.kwargs["base_url"] == sql_chain.PROVIDER_BASE_URLS["groq"]
-    assert llm.kwargs["model"] == "llama-3.3-70b-versatile"
+    assert llm.kwargs["model"] == "openai/gpt-oss-120b"
 
 
 def test_byok_groq_uses_groqs_base_url_and_default_model():
@@ -51,11 +51,11 @@ def test_byok_groq_uses_groqs_base_url_and_default_model():
 
 
 def test_byok_respects_an_explicit_model_override():
-    config = LLMConfig(provider="groq", api_key="gsk_test", model="llama-3.1-8b-instant")
+    config = LLMConfig(provider="groq", api_key="gsk_test", model="openai/gpt-oss-20b")
 
     llm = sql_chain.get_llm(config)
 
-    assert llm.kwargs["model"] == "llama-3.1-8b-instant"
+    assert llm.kwargs["model"] == "openai/gpt-oss-20b"
 
 
 def test_byok_openai_has_no_custom_base_url():

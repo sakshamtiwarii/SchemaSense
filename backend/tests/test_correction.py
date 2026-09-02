@@ -100,7 +100,7 @@ async def test_rejects_non_read_only_sql_before_execution(monkeypatch):
 @pytest.mark.asyncio
 async def test_llm_config_is_forwarded_to_generate_and_fix(monkeypatch):
     seen = {}
-    config = LLMConfig(provider="groq", api_key="gsk_test", model="llama-3.3-70b-versatile")
+    config = LLMConfig(provider="groq", api_key="gsk_test", model="openai/gpt-oss-120b")
     attempts = {"n": 0}
 
     async def fake_generate_sql(question, schema_context, llm_config=None):

@@ -55,7 +55,11 @@ PROVIDER_BASE_URLS = {
 
 PROVIDER_DEFAULT_MODELS = {
     "openai": None,  # None = fall back to settings.chat_model
-    "groq": "llama-3.3-70b-versatile",
+    # Groq retires models on a rolling basis and a retired name comes back
+    # as a 404 that reads exactly like a bad key — llama-3.3-70b-versatile
+    # sat here until its shutdown on 2026-08-16. Check
+    # console.groq.com/docs/deprecations before trusting this default.
+    "groq": "openai/gpt-oss-120b",
 }
 
 _llm: ChatOpenAI | None = None

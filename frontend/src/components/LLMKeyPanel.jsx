@@ -2,7 +2,7 @@ import { useState } from "react";
 import styles from "./LLMKeyPanel.module.css";
 
 const PROVIDERS = [
-  { value: "groq", label: "Groq", placeholder: "gsk_...", defaultModel: "llama-3.3-70b-versatile" },
+  { value: "groq", label: "Groq", placeholder: "gsk_...", defaultModel: "openai/gpt-oss-120b" },
   { value: "openai", label: "OpenAI", placeholder: "sk-...", defaultModel: "gpt-4o-mini" },
 ];
 

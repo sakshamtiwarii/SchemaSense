@@ -90,11 +90,11 @@ OpenAI key instead of the server's, for that request only:
 ```json
 {
   "question": "What were our top 3 products by revenue?",
-  "llm": { "provider": "groq", "api_key": "gsk_...", "model": "llama-3.3-70b-versatile" }
+  "llm": { "provider": "groq", "api_key": "gsk_...", "model": "openai/gpt-oss-120b" }
 }
 ```
 
-`model` is optional — it defaults to `llama-3.3-70b-versatile` for Groq and
+`model` is optional — it defaults to `openai/gpt-oss-120b` for Groq and
 the server's configured model for OpenAI. Groq's API is OpenAI-compatible,
 so this reuses the same `ChatOpenAI` client pointed at a different base URL
 (`app/core/sql_chain.py`); `provider` is a closed set mapped to a
