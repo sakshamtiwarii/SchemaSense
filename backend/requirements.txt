@@ -2,6 +2,9 @@ fastapi==0.115.0
 uvicorn[standard]==0.30.6
 langchain==0.3.7
 langchain-openai==0.2.6
+# Imported directly by core/sql_chain.py for the provider error types, not
+# just pulled in behind langchain-openai — so it's pinned here on purpose.
+openai==1.109.1
 asyncpg==0.29.0
 redis==5.0.8
 pydantic==2.9.2

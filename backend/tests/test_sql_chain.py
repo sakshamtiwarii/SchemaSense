@@ -1,3 +1,5 @@
+import httpx
+import openai
 import pytest
 
 from app.core import sql_chain
@@ -80,3 +82,64 @@ def test_byok_does_not_affect_the_default_singleton():
     default_after = sql_chain.get_llm()
 
     assert default_before is default_after
+
+
+def _provider_error(cls, status):
+    """Build a real provider exception the way the openai SDK raises them."""
+    request = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
+    return cls("boom", response=httpx.Response(status, request=request), body=None)
+
+
+class _RaisingClient:
+    def __init__(self, exc, **kwargs):
+        self._exc = exc
+        self.kwargs = kwargs
+
+    async def ainvoke(self, prompt):
+        raise self._exc
+
+
+@pytest.mark.parametrize(
+    "cls, status",
+    [
+        (openai.AuthenticationError, 401),
+        (openai.PermissionDeniedError, 403),
+        (openai.NotFoundError, 404),
+        (openai.BadRequestError, 400),
+    ],
+)
+async def test_a_bad_key_or_model_becomes_an_llm_config_error(monkeypatch, cls, status):
+    exc = _provider_error(cls, status)
+    monkeypatch.setattr(sql_chain, "get_llm", lambda config=None: _RaisingClient(exc))
+
+    with pytest.raises(sql_chain.LLMConfigError):
+        await sql_chain.generate_sql("q", "schema", LLMConfig(provider="groq", api_key="gsk_test"))
+
+
+async def test_a_blank_key_fails_before_any_network_call(monkeypatch):
+    def _boom(config=None):
+        raise openai.OpenAIError("The api_key client option must be set")
+
+    monkeypatch.setattr(sql_chain, "get_llm", _boom)
+
+    with pytest.raises(sql_chain.LLMConfigError):
+        await sql_chain.generate_sql("q", "schema")
+
+
+@pytest.mark.parametrize("cls, status", [(openai.RateLimitError, 429), (openai.InternalServerError, 500)])
+async def test_a_provider_having_a_bad_day_is_not_a_config_error(monkeypatch, cls, status):
+    """Rate limits and outages say nothing about the key — they must not be
+    translated, or the caller gets told their valid key is invalid."""
+    exc = _provider_error(cls, status)
+    monkeypatch.setattr(sql_chain, "get_llm", lambda config=None: _RaisingClient(exc))
+
+    with pytest.raises(cls):
+        await sql_chain.generate_sql("q", "schema", LLMConfig(provider="groq", api_key="gsk_test"))
+
+
+async def test_the_correction_prompt_translates_errors_the_same_way(monkeypatch):
+    exc = _provider_error(openai.AuthenticationError, 401)
+    monkeypatch.setattr(sql_chain, "get_llm", lambda config=None: _RaisingClient(exc))
+
+    with pytest.raises(sql_chain.LLMConfigError):
+        await sql_chain.fix_sql("q", "SELECT 1", "boom", "schema", LLMConfig(provider="groq", api_key="gsk_test"))

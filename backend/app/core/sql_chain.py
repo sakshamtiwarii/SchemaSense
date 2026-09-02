@@ -1,9 +1,34 @@
 from dataclasses import dataclass
 
+import openai
 from langchain_openai import ChatOpenAI
 
 from app.config import settings
 from app.core.prompts import SQL_FIX_PROMPT, SQL_GENERATION_PROMPT
+
+
+class LLMConfigError(Exception):
+    """The API key or model this request was built with is unusable.
+
+    Raised only for provider responses that indict the *credentials or the
+    model name* — a revoked key, a key without access to that model, a model
+    that no longer exists. Rate limits, timeouts and provider outages say
+    nothing about how the request was configured, so they deliberately stay
+    ordinary exceptions and reach the route as an upstream failure.
+    """
+
+
+# The provider errors that mean "what you configured is wrong", as opposed
+# to "the provider is having a bad day". All are openai.APIStatusError
+# subclasses, but RateLimitError and InternalServerError are siblings rather
+# than children, so they fall through this tuple untouched.
+CONFIG_ERRORS = (
+    openai.AuthenticationError,       # 401 - key is wrong, revoked, or for another provider
+    openai.PermissionDeniedError,     # 403 - key exists but can't use this model
+    openai.NotFoundError,             # 404 - model doesn't exist, or was retired
+    openai.BadRequestError,           # 400 - model name or params rejected
+    openai.UnprocessableEntityError,  # 422
+)
 
 
 @dataclass(frozen=True)
@@ -64,10 +89,31 @@ def _build_client(provider: str, api_key: str, model: str) -> ChatOpenAI:
     return ChatOpenAI(**kwargs)
 
 
+async def _draft_sql(prompt: str, llm_config: LLMConfig | None) -> str:
+    """Run one prompt through the LLM, translating configuration failures.
+
+    Both the client construction and the call itself can fail because of a
+    bad key or model, and both are funnelled into LLMConfigError so callers
+    never have to know which provider SDK is underneath.
+    """
+    try:
+        # Construction fails only when the key is missing or blank — the
+        # provider SDK checks that before any network call happens.
+        llm = get_llm(llm_config)
+    except openai.OpenAIError as exc:
+        raise LLMConfigError(str(exc)) from exc
+
+    try:
+        response = await llm.ainvoke(prompt)
+    except CONFIG_ERRORS as exc:
+        raise LLMConfigError(str(exc)) from exc
+
+    return _extract_sql(response.content)
+
+
 async def generate_sql(question: str, schema_context: str, llm_config: LLMConfig | None = None) -> str:
     prompt = SQL_GENERATION_PROMPT.format(schema=schema_context, question=question)
-    response = await get_llm(llm_config).ainvoke(prompt)
-    return _extract_sql(response.content)
+    return await _draft_sql(prompt, llm_config)
 
 
 async def fix_sql(
@@ -83,8 +129,7 @@ async def fix_sql(
         failed_sql=failed_sql,
         error=error,
     )
-    response = await get_llm(llm_config).ainvoke(prompt)
-    return _extract_sql(response.content)
+    return await _draft_sql(prompt, llm_config)
 
 
 def _extract_sql(text: str) -> str:
